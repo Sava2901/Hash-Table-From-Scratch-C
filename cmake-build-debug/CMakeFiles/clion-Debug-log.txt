@@ -1,0 +1,4 @@
+"D:\Sergiu\Apps\CLion\CLion 2023.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=D:/Sergiu/Apps/CLion/CLion 2023.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S D:\Sergiu\CodingProjects\C\Hash-Table-From-Scratch-C -B D:\Sergiu\CodingProjects\C\Hash-Table-From-Scratch-C\cmake-build-debug
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/Sergiu/CodingProjects/C/Hash-Table-From-Scratch-C/cmake-build-debug

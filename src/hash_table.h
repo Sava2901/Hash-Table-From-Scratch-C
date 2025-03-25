@@ -7,6 +7,7 @@ typedef struct HashTable HashTable;
 struct Item {
     char* key;
     char* value;
+    Item* next;
 };
 
 struct HashTable {

@@ -35,35 +35,34 @@ HashTable* newHashTable() {
     return hashTable;
 }
 
-void deleteHashTable(HashTable* hashTable) {
-    for (int i = 0; i < hashTable->size; i++) {
-        Item* item = hashTable->items[i];
-        if (item != NULL) {
-            deleteItem(item);
-        }
-    }
-    free(hashTable->items);
-    free(hashTable);
-}
-
 void hashTableInsert(HashTable* hashTable, const char* key, const char* value) {
-    Item* item = newItem(key, value);
-
     unsigned long index = hashFunction(key, hashTable->size);
+    Item* current = hashTable->items[index];
 
-    if (hashTable->items[index] != NULL) {
-        deleteItem(hashTable->items[index]);
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            free(current->value);
+            current->value = strdup(value);
+            return;
+        }
+        current = current->next;
     }
-    hashTable->items[index] = item;
+
+    Item* new_item = newItem(key, value);
+    new_item->next = hashTable->items[index];
+    hashTable->items[index] = new_item;
     hashTable->count++;
 }
 
 char* hashTableSearch(HashTable* hashTable, const char* key) {
     unsigned long index = hashFunction(key, hashTable->size);
+    Item* current = hashTable->items[index];
 
-    Item* item = hashTable->items[index];
-    if (item != NULL && strcmp(item->key, key) == 0) {
-        return item->value;
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            return current->value;
+        }
+        current = current->next;
     }
 
     return NULL;
@@ -71,11 +70,34 @@ char* hashTableSearch(HashTable* hashTable, const char* key) {
 
 void hashTableDelete(HashTable* hashTable, const char* key) {
     unsigned long index = hashFunction(key, hashTable->size);
+    Item* current = hashTable->items[index];
+    Item* prev = NULL;
 
-    Item* item = hashTable->items[index];
-    if (item != NULL && strcmp(item->key, key) == 0) {
-        deleteItem(item);
-        hashTable->items[index] = NULL;
-        hashTable->count--;
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            if (prev == NULL) {
+                hashTable->items[index] = current->next;
+            } else {
+                prev->next = current->next;
+            }
+            deleteItem(current);
+            hashTable->count--;
+            return;
+        }
+        prev = current;
+        current = current->next;
     }
+}
+
+void deleteHashTable(HashTable* hashTable) {
+    for (int i = 0; i < hashTable->size; i++) {
+        Item* current = hashTable->items[i];
+        while (current != NULL) {
+            Item* temp = current;
+            current = current->next;
+            deleteItem(temp);
+        }
+    }
+    free(hashTable->items);
+    free(hashTable);
 }

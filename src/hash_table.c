@@ -56,7 +56,7 @@ void deleteHashTable(HashTable* hashTable) {
     free(hashTable);
 }
 
-void hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, const void* value, size_t value_size) {
+void _hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, const void* value, size_t value_size) {
     unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
     Item* current = hashTable->items[index];
 
@@ -77,7 +77,7 @@ void hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, con
     hashTable->count++;
 }
 
-void* hashTableSearch(const HashTable* hashTable, const void* key, size_t key_size) {
+void* _hashTableSearch(const HashTable* hashTable, const void* key, size_t key_size) {
     unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
     Item* current = hashTable->items[index];
 
@@ -87,27 +87,21 @@ void* hashTableSearch(const HashTable* hashTable, const void* key, size_t key_si
         }
         current = current->next;
     }
-
     return NULL;
 }
 
-void hashTableDelete(HashTable* hashTable, const void* key, size_t key_size) {
+void _hashTableDelete(HashTable* hashTable, const void* key, size_t key_size) {
     unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
-    Item* current = hashTable->items[index];
-    Item* prev = NULL;
+    Item** current = &hashTable->items[index];
 
-    while (current != NULL) {
-        if (hashTable->key_compare(current->key, key, key_size) == 0) {
-            if (prev == NULL) {
-                hashTable->items[index] = current->next;
-            } else {
-                prev->next = current->next;
-            }
-            deleteItem(current);
+    while (*current != NULL) {
+        if (hashTable->key_compare((*current)->key, key, key_size) == 0) {
+            Item* temp = *current;
+            *current = (*current)->next;
+            deleteItem(temp);
             hashTable->count--;
             return;
         }
-        prev = current;
-        current = current->next;
+        current = &((*current)->next);
     }
 }

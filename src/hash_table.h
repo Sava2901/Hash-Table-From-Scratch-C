@@ -25,8 +25,17 @@ struct HashTable {
 HashTable* newHashTable(int size, HashFunction hash_function, KeyCompareFunction key_compare);
 void deleteHashTable(HashTable* hashTable);
 
-void hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, const void* value, size_t value_size);
-void* hashTableSearch(const HashTable* hashTable, const void* key, size_t key_size);
-void hashTableDelete(HashTable* hashTable, const void* key, size_t key_size);
+#define hashTableInsert(ht, key, value) \
+_hashTableInsert(ht, key, sizeof(*key), value, sizeof(*value))
+
+#define hashTableSearch(ht, key) \
+_hashTableSearch(ht, key, sizeof(*key))
+
+#define hashTableDelete(ht, key) \
+_hashTableDelete(ht, key, sizeof(*key))
+
+void _hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, const void* value, size_t value_size);
+void* _hashTableSearch(const HashTable* hashTable, const void* key, size_t key_size);
+void _hashTableDelete(HashTable* hashTable, const void* key, size_t key_size);
 
 #endif

@@ -1,46 +1,36 @@
 #include <stdio.h>
-#include <string.h>
 #include "hash_table.h"
 
 typedef struct {
-    int x;
-    double y;
-} CustomStruct;
+    int id;
+    double score;
+    char name[20];
+} Student;
 
 int main() {
     HashTable* hashTable = newHashTable(53, NULL, NULL);
 
-    int intKey = 10;
-    double doubleKey = 5.5;
-    char* stringKey = "example";
-    CustomStruct structKey = {1, 2.5};
+    int intKey = 42;
+    char stringKey = "studentA";
 
-    int intValue = 100;
-    double doubleValue = 99.99;
-    char* stringValue = "Hello, World!";
-    CustomStruct structValue = {42, 3.14};
+    Student studentValue = {101, 95.5, "Alice"};
+    int intValue = 999;
 
-    hashTableInsert(hashTable, &intKey, sizeof(int), &structValue, sizeof(CustomStruct));
-    hashTableInsert(hashTable, &doubleKey, sizeof(double), &doubleValue, sizeof(double));
-    hashTableInsert(hashTable, stringKey, strlen(stringKey) + 1, stringValue, strlen(stringValue) + 1);
-    hashTableInsert(hashTable, &structKey, sizeof(CustomStruct), &intValue, sizeof(int));
+    hashTableInsert(hashTable, &intKey, &studentValue);
+    hashTableInsert(hashTable, &stringKey, &intValue);
 
-    printf("doubleKey: %.2f\n", *(double*)hashTableSearch(hashTable, &doubleKey, sizeof(double)));
-    printf("stringKey: %s\n", (char*)hashTableSearch(hashTable, stringKey, strlen(stringKey) + 1));
-
-    CustomStruct* retrievedStruct = hashTableSearch(hashTable, &intKey, sizeof(int));
-    if (retrievedStruct) {
-        printf("intKey: {x: %d, y: %.2f}\n", retrievedStruct->x, retrievedStruct->y);
+    Student* retrievedStudent = hashTableSearch(hashTable, &intKey);
+    if (retrievedStudent) {
+        printf("Student (ID: %d, Score: %.1f, Name: %s)\n",
+               retrievedStudent->id, retrievedStudent->score, retrievedStudent->name);
     }
 
-    int* retrievedInt = hashTableSearch(hashTable, &structKey, sizeof(CustomStruct));
+    int* retrievedInt = hashTableSearch(hashTable, &stringKey);
     if (retrievedInt) {
-        printf("structKey: %d\n", *retrievedInt);
+        printf("Retrieved int for key 'studentA': %d\n", *retrievedInt);
     }
-
-    hashTableDelete(hashTable, &doubleKey, sizeof(double));
-    printf("doubleKey after deletion: %p\n", hashTableSearch(hashTable, &doubleKey, sizeof(double)));
 
     deleteHashTable(hashTable);
+
     return 0;
 }

@@ -1,40 +1,46 @@
 #include <stdio.h>
+#include <string.h>
 #include "hash_table.h"
 
+typedef struct {
+    int x;
+    double y;
+} CustomStruct;
+
 int main() {
-    HashTable* hashTable = newHashTable();
+    HashTable* hashTable = newHashTable(53, NULL, NULL);
 
-    hashTableInsert(hashTable, "name", "Alice");
-    hashTableInsert(hashTable, "age", "25");
-    hashTableInsert(hashTable, "city", "Wonderland");
+    int intKey = 10;
+    double doubleKey = 5.5;
+    char* stringKey = "example";
+    CustomStruct structKey = {1, 2.5};
 
-    printf("name: %s\n", hashTableSearch(hashTable, "name"));
-    printf("age: %s\n", hashTableSearch(hashTable, "age"));
-    printf("city: %s\n", hashTableSearch(hashTable, "city"));
-    printf("country: %s\n", hashTableSearch(hashTable, "country"));
+    int intValue = 100;
+    double doubleValue = 99.99;
+    char* stringValue = "Hello, World!";
+    CustomStruct structValue = {42, 3.14};
 
-    hashTableInsert(hashTable, "city", "Neverland");
-    printf("Updated city: %s\n", hashTableSearch(hashTable, "city"));
+    hashTableInsert(hashTable, &intKey, sizeof(int), &structValue, sizeof(CustomStruct));
+    hashTableInsert(hashTable, &doubleKey, sizeof(double), &doubleValue, sizeof(double));
+    hashTableInsert(hashTable, stringKey, strlen(stringKey) + 1, stringValue, strlen(stringValue) + 1);
+    hashTableInsert(hashTable, &structKey, sizeof(CustomStruct), &intValue, sizeof(int));
 
-    hashTableDelete(hashTable, "age");
-    printf("age after deletion: %s\n", hashTableSearch(hashTable, "age"));
+    printf("doubleKey: %.2f\n", *(double*)hashTableSearch(hashTable, &doubleKey, sizeof(double)));
+    printf("stringKey: %s\n", (char*)hashTableSearch(hashTable, stringKey, strlen(stringKey) + 1));
 
-    hashTableInsert(hashTable, "key1", "value1");
-    hashTableInsert(hashTable, "key2", "value2");
-    hashTableInsert(hashTable, "key3", "value3");
+    CustomStruct* retrievedStruct = hashTableSearch(hashTable, &intKey, sizeof(int));
+    if (retrievedStruct) {
+        printf("intKey: {x: %d, y: %.2f}\n", retrievedStruct->x, retrievedStruct->y);
+    }
 
-    printf("key1: %s\n", hashTableSearch(hashTable, "key1"));
-    printf("key2: %s\n", hashTableSearch(hashTable, "key2"));
-    printf("key3: %s\n", hashTableSearch(hashTable, "key3"));
+    int* retrievedInt = hashTableSearch(hashTable, &structKey, sizeof(CustomStruct));
+    if (retrievedInt) {
+        printf("structKey: %d\n", *retrievedInt);
+    }
 
-    hashTableDelete(hashTable, "key2");
-    printf("key2 after deletion: %s\n", hashTableSearch(hashTable, "key2"));
-
-    printf("key1: %s\n", hashTableSearch(hashTable, "key1"));
-    printf("key3: %s\n", hashTableSearch(hashTable, "key3"));
+    hashTableDelete(hashTable, &doubleKey, sizeof(double));
+    printf("doubleKey after deletion: %p\n", hashTableSearch(hashTable, &doubleKey, sizeof(double)));
 
     deleteHashTable(hashTable);
-
-    printf("All tests completed successfully.\n");
     return 0;
 }

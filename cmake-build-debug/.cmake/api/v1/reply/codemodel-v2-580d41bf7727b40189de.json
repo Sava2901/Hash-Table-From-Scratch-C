@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Hash_Table_From_Scratch_C::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Hash_Table_From_Scratch_C-Debug-57a62e5539b836e54c1d.json",
+					"jsonFile" : "target-Hash_Table_From_Scratch_C-Debug-8a1ec2f229ac71785b25.json",
 					"name" : "Hash_Table_From_Scratch_C",
 					"projectIndex" : 0
 				}
@@ -49,12 +49,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "D:/Sergiu/CodingProjects/C/Hash-Table-From-Scratch-C/cmake-build-debug",
-		"source" : "D:/Sergiu/CodingProjects/C/Hash-Table-From-Scratch-C"
+		"build" : "D:/Coding Projects/C/Hash-Table-From-Scratch-C/cmake-build-debug",
+		"source" : "D:/Coding Projects/C/Hash-Table-From-Scratch-C"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 5
+		"minor" : 7
 	}
 }

@@ -2,22 +2,28 @@
 #include <string.h>
 #include "hash_table.h"
 
-static unsigned long hashFunction(const char* _key, int size) {
+static unsigned long defaultHashFunction(const void* key, size_t key_size, int size) {
+    const unsigned char* data = key;
     unsigned long hash = 5381;
-    unsigned char *key = (unsigned char*) _key;
-    int c;
-
-    while ((c = *key++)) {
-        hash = ((hash << 5) + hash) + c; // hash * 33 + c
+    for (size_t i = 0; i < key_size; i++) {
+        hash = (hash << 5) + hash + data[i];
     }
-
     return hash % size;
 }
 
-static Item* newItem(const char* key, const char* value) {
+static int defaultKeyCompare(const void* key1, const void* key2, size_t key_size) {
+    return memcmp(key1, key2, key_size);
+}
+
+static Item* newItem(const void* key, size_t key_size, const void* value, size_t value_size) {
     Item* item = malloc(sizeof(Item));
-    item->key = strdup(key);
-    item->value = strdup(value);
+    item->key = malloc(key_size);
+    item->value = malloc(value_size);
+    memcpy(item->key, key, key_size);
+    memcpy(item->value, value, value_size);
+    item->key_size = key_size;
+    item->value_size = value_size;
+    item->next = NULL;
     return item;
 }
 
@@ -27,66 +33,14 @@ static void deleteItem(Item* item) {
     free(item);
 }
 
-HashTable* newHashTable() {
+HashTable* newHashTable(int size, HashFunction hash_function, KeyCompareFunction key_compare) {
     HashTable* hashTable = malloc(sizeof(HashTable));
-    hashTable->size = 53;
+    hashTable->size = size;
     hashTable->count = 0;
-    hashTable->items = calloc((size_t)hashTable->size, sizeof(Item*));
+    hashTable->items = calloc(size, sizeof(Item*));
+    hashTable->hash_function = hash_function ? hash_function : defaultHashFunction;
+    hashTable->key_compare = key_compare ? key_compare : defaultKeyCompare;
     return hashTable;
-}
-
-void hashTableInsert(HashTable* hashTable, const char* key, const char* value) {
-    unsigned long index = hashFunction(key, hashTable->size);
-    Item* current = hashTable->items[index];
-
-    while (current != NULL) {
-        if (strcmp(current->key, key) == 0) {
-            free(current->value);
-            current->value = strdup(value);
-            return;
-        }
-        current = current->next;
-    }
-
-    Item* new_item = newItem(key, value);
-    new_item->next = hashTable->items[index];
-    hashTable->items[index] = new_item;
-    hashTable->count++;
-}
-
-char* hashTableSearch(HashTable* hashTable, const char* key) {
-    unsigned long index = hashFunction(key, hashTable->size);
-    Item* current = hashTable->items[index];
-
-    while (current != NULL) {
-        if (strcmp(current->key, key) == 0) {
-            return current->value;
-        }
-        current = current->next;
-    }
-
-    return NULL;
-}
-
-void hashTableDelete(HashTable* hashTable, const char* key) {
-    unsigned long index = hashFunction(key, hashTable->size);
-    Item* current = hashTable->items[index];
-    Item* prev = NULL;
-
-    while (current != NULL) {
-        if (strcmp(current->key, key) == 0) {
-            if (prev == NULL) {
-                hashTable->items[index] = current->next;
-            } else {
-                prev->next = current->next;
-            }
-            deleteItem(current);
-            hashTable->count--;
-            return;
-        }
-        prev = current;
-        current = current->next;
-    }
 }
 
 void deleteHashTable(HashTable* hashTable) {
@@ -100,4 +54,60 @@ void deleteHashTable(HashTable* hashTable) {
     }
     free(hashTable->items);
     free(hashTable);
+}
+
+void hashTableInsert(HashTable* hashTable, const void* key, size_t key_size, const void* value, size_t value_size) {
+    unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
+    Item* current = hashTable->items[index];
+
+    while (current != NULL) {
+        if (hashTable->key_compare(current->key, key, key_size) == 0) {
+            free(current->value);
+            current->value = malloc(value_size);
+            memcpy(current->value, value, value_size);
+            current->value_size = value_size;
+            return;
+        }
+        current = current->next;
+    }
+
+    Item* new_item = newItem(key, key_size, value, value_size);
+    new_item->next = hashTable->items[index];
+    hashTable->items[index] = new_item;
+    hashTable->count++;
+}
+
+void* hashTableSearch(const HashTable* hashTable, const void* key, size_t key_size) {
+    unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
+    Item* current = hashTable->items[index];
+
+    while (current != NULL) {
+        if (hashTable->key_compare(current->key, key, key_size) == 0) {
+            return current->value;
+        }
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+void hashTableDelete(HashTable* hashTable, const void* key, size_t key_size) {
+    unsigned long index = hashTable->hash_function(key, key_size, hashTable->size);
+    Item* current = hashTable->items[index];
+    Item* prev = NULL;
+
+    while (current != NULL) {
+        if (hashTable->key_compare(current->key, key, key_size) == 0) {
+            if (prev == NULL) {
+                hashTable->items[index] = current->next;
+            } else {
+                prev->next = current->next;
+            }
+            deleteItem(current);
+            hashTable->count--;
+            return;
+        }
+        prev = current;
+        current = current->next;
+    }
 }

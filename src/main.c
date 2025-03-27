@@ -11,7 +11,8 @@ int main() {
     HashTable* hashTable = newHashTable(53, NULL, NULL);
 
     int intKey = 42;
-    char stringKey = "studentA";
+    char* stringKey = "studentA";
+    float x = 5.88545e-44;
 
     Student studentValue = {101, 95.5, "Alice"};
     int intValue = 999;
@@ -23,6 +24,12 @@ int main() {
     if (retrievedStudent) {
         printf("Student (ID: %d, Score: %.1f, Name: %s)\n",
                retrievedStudent->id, retrievedStudent->score, retrievedStudent->name);
+    }
+
+    Student* retrievedStudent2 = hashTableSearch(hashTable, &x);
+    if (retrievedStudent2) {
+        printf("Student2 (ID: %d, Score: %.1f, Name: %s)\n",
+               retrievedStudent2->id, retrievedStudent2->score, retrievedStudent2->name);
     }
 
     int* retrievedInt = hashTableSearch(hashTable, &stringKey);
